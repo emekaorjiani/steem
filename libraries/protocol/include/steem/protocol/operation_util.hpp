@@ -32,3 +32,40 @@ void operation_get_required_authorities( const OperationType& op,               
                                          vector< authority >& other );           \
                                                                                  \
 } } /* steem::protocol */
+
+namespace steem { namespace protocol {
+
+   struct get_required_authorities_visitor
+   {
+      typedef void result_type;
+
+      flat_set< account_name_type >&   active;
+      flat_set< account_name_type >&   owner;
+      flat_set< account_name_type >&   posting;
+      std::vector< authority >&        other;
+
+      get_required_authorities_visitor(
+            flat_set< account_name_type >& a,
+            flat_set< account_name_type >& own,
+            flat_set< account_name_type >& post,
+            std::vector< authority >& oth )
+         : active( a ), owner( own ), posting( post ), other( oth ) {}
+
+      // If it is an operation type, we need to unwrap it and call the visitor again.
+      template< typename ... Ts >
+      void operator()( const static_variant< Ts... >& v )
+      {
+         v.visit( get_required_authorities_visitor( active, owner, posting, other ) );
+      }
+
+      template< typename T >
+      void operator()( const T& v )const
+      {
+         v.get_required_active_authorities( active );
+         v.get_required_owner_authorities( owner );
+         v.get_required_posting_authorities( posting );
+         v.get_required_authorities( other );
+      }
+};
+
+} } /* steem::protocol */

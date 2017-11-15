@@ -5,6 +5,7 @@
 
 #include <steem/protocol/get_config.hpp>
 #include <steem/protocol/exceptions.hpp>
+#include <steem/protocol/transaction_util.hpp>
 
 namespace steem { namespace plugins { namespace database_api {
 
@@ -1845,28 +1846,8 @@ DEFINE_API( database_api_impl, verify_signatures )
    // verify authority throws on failure, catch and return false
    try
    {
-      steem::protocol::verify_authority(
-         [&args]( flat_set< account_name_type >& required_active,
-                  flat_set< account_name_type >& required_owner,
-                  flat_set< account_name_type >& required_posting,
-                  vector< authority >& )
-         {
-            switch( args.auth_level )
-            {
-               case authority::owner:
-                  std::copy( args.accounts.begin(), args.accounts.end(), required_owner.end() );
-                  break;
-               case authority::active:
-                  std::copy( args.accounts.begin(), args.accounts.end(), required_active.end() );
-                  break;
-               case authority::posting:
-                  std::copy( args.accounts.begin(), args.accounts.end(), required_posting.end() );
-                  break;
-               case authority::key:
-               default:
-                  FC_ASSERT( false, "verify_signatures only supports owner, active, and posting auths" );
-            }
-         },
+      steem::protocol::verify_authority< verify_signatures_args >(
+         { args },
          sig_keys,
          [this]( const string& name ) { return authority( _db.get< chain::account_authority_object, chain::by_account >( name ).owner ); },
          [this]( const string& name ) { return authority( _db.get< chain::account_authority_object, chain::by_account >( name ).active ); },
