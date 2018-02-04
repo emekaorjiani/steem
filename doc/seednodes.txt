@@ -36,3 +36,4 @@ seed.minnowshares.net:2001      # reggaemuffin
 seed.windforce.farm:2001        # windforce
 seed.teamsteem.me:2001          # teamsteem
 steem-seed.crypto.fans:2001     # sc-steemit
+165.227.115.246:2001            # doctorvee
